@@ -1,6 +1,6 @@
 /*  
 
-    Impulse Generator v1.03 (5th May 2014)
+    Impulse Generator v1.04 (8th May 2014)
 
 */
 
@@ -17,45 +17,43 @@ Bounce advanceHourDebouncer = Bounce();
 // CONFIGURATION ///////////////////////////////////////////////////
 //
 #define DEBUG
-byte maxPulse = 30;          // Should be 30 unless debugging.
-byte pulseLength = 150;      // Pulse duration (ms).
-byte brightness = 255;       // Brightness level of LEDs.
+const byte maxPulse = 30;          // Should be 30 unless debugging.
+const byte pulseLength = 220;      // Pulse duration (ms).
+const byte brightness = 255;       // Brightness level of LEDs.
 //
 ////////////////////////////////////////////////////////////////////
 
 // Interrupt
-byte clockInt = 0;           // Digital 2 is INT0
+const byte clockInt = 0;           // Digital 2 is INT0
 
 // Inputs
-byte retardButton = 8;
-byte advanceButton = 13;
-byte retardHourButton = 12;
-byte advanceHourButton = 9;
+const byte retardButton = 8;
+const byte advanceButton = 13;
+const byte retardHourButton = 12;
+const byte advanceHourButton = 9;
 
 // Outputs
-byte onePulse = 7;
-byte sixPulse = 4;
-byte thirtyPulse = 3;
-byte pendulumLed = 10;
-byte threeLed = 6;
-byte twoLed = 5;
-byte oneLed = 11;
+const byte onePulse = 7;
+const byte sixPulse = 4;
+const byte thirtyPulse = 3;
+const byte pendulumLed = 10;
+const byte threeLed = 6;
+const byte twoLed = 5;
+const byte oneLed = 11;
 
 // Variables
 byte seconds = 0;
 unsigned long pulsedOneAt = 0;
 unsigned long pulsedSixAt = 0;
 unsigned long pulsedThirtyAt = 0;
+unsigned long resetIndicatorFlashed = 0;
+byte resetIndicatorState = 0;
 byte buttonLockBy = 0;
 int adjustment = 0;
 
-unsigned long retardButtonPressTimeStamp;
-unsigned long advanceButtonPressTimeStamp;
-unsigned long retardHourButtonPressTimeStamp;
-unsigned long advanceHourButtonPressTimeStamp;
-
 boolean onePulseState, sixPulseState, thirtyPulseState, disableCounterLeds, retardButtonState, advanceButtonState, retardHourButtonState, advanceHourButtonState;
 
+boolean clockSet = 0;
 boolean pulsesEnabled = 1;
 boolean pendulumLedState = 1;
 
@@ -199,13 +197,11 @@ void clockControl()
     if (adjustment < 0) {
 
       if (adjustment == -1) {
-
         disableCounterLeds = 0;
         analogWrite(twoLed,0);
         retardHourButtonState = 0;
         buttonLockBy = 0;
         DEBUG_PRINT("\r\n");
-
       }
 
       adjustment++;
@@ -223,7 +219,6 @@ void clockControl()
       }
 
       if (adjustment == 1) {
-
         disableCounterLeds = 0;
         analogWrite(oneLed,0);
         analogWrite(twoLed,0);
@@ -231,7 +226,6 @@ void clockControl()
         advanceHourButtonState = 0;
         buttonLockBy = 0;
         DEBUG_PRINT("\r\n");
-
       }
 
       adjustment--;
@@ -254,7 +248,7 @@ void clockControl()
   }
  
   // Countdown LEDs
-  if (!disableCounterLeds) {
+  if (!disableCounterLeds && clockSet) {
  
     if (seconds == 27) {
       analogWrite(threeLed,brightness);
@@ -302,6 +296,19 @@ void loop()
     thirtyPulseState = 0;
   }
   
+  //// Clock Ready / Reset Indicator
+  if (clockSet == 0) {
+    if (runtime - resetIndicatorFlashed > 250) {
+      resetIndicatorFlashed = runtime;
+      if (resetIndicatorState == 0) {
+        resetIndicatorState = brightness;
+        analogWrite(twoLed,resetIndicatorState);
+      } else {
+        resetIndicatorState = 0;
+        analogWrite(twoLed,resetIndicatorState);
+      }
+    }
+  }
 
   //// Handle Buttons
   boolean retardChanged = retardDebouncer.update();
@@ -314,6 +321,7 @@ void loop()
   if (retardChanged) {
     
     int value = retardDebouncer.read();
+    clockSet = 1;
   
     if (value == HIGH) {
 
@@ -347,6 +355,7 @@ void loop()
   if (advanceChanged) {
   
     int value = advanceDebouncer.read();
+    clockSet = 1;
 
     if (value == HIGH) {
 
@@ -379,6 +388,7 @@ void loop()
   if (retardHourChanged) {
   
     int value = retardHourDebouncer.read();
+    clockSet = 1;
   
     if (value == HIGH) {
       
@@ -409,6 +419,7 @@ void loop()
   if (advanceHourChanged) {
     
     int value = advanceHourDebouncer.read();
+    clockSet = 1;
   
     if (value == HIGH) {
 
