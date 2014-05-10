@@ -1,6 +1,6 @@
 /*  
 
-    Impulse Generator v1.04 (8th May 2014)
+    Impulse Generator v1.05 (9th May 2014)
 
 */
 
@@ -16,9 +16,9 @@ Bounce advanceHourDebouncer = Bounce();
 
 // CONFIGURATION ///////////////////////////////////////////////////
 //
-#define DEBUG
+//#define DEBUG
 const byte maxPulse = 30;          // Should be 30 unless debugging.
-const byte pulseLength = 220;      // Pulse duration (ms).
+const byte pulseLength = 90;       // Pulse duration (ms).
 const byte brightness = 255;       // Brightness level of LEDs.
 //
 ////////////////////////////////////////////////////////////////////
