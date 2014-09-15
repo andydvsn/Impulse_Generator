@@ -18,7 +18,7 @@ Bounce advanceHourDebouncer = Bounce();
 //
 //#define DEBUG
 const byte maxPulse = 30;          // Should be 30 unless debugging.
-const byte pulseLength = 50;       // Pulse duration (ms).
+const byte pulseLength = 100;      // Pulse duration (ms).
 const byte brightness = 255;       // Brightness level of LEDs.
 //
 ////////////////////////////////////////////////////////////////////
